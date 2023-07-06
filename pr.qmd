@@ -1,0 +1,73 @@
+---
+title: "Pulse Rate"
+author: "Vibha Dara"
+format: html
+---
+
+##Question
+
+What is the difference in pulse rate between two randomly selected female students in this class?
+
+```{r}
+library(tidyverse)
+library(primer.data)
+library(rstanarm)
+```
+
+```{r}
+x <- nhanes |>
+  select(pulse, gender) |>
+  drop_na() |>
+  filter(gender == "Female")
+```
+
+```{r}
+glimpse(x)
+```
+
+Wisdom - 
+
+Justice - 
+
+Courage - Courage is the third Cardinal Virtue in data science. Justice gave us the data and the structure of the model. Courage allows us to explore different models. Even though Justice has provided the basic mathematical structure of the model, we still need to decide which variables to include and to estimate the values of unknown parameters. We avoid hypothesis tests. We check our models for consistency with the data we have. We select one model.
+
+```{r}
+fit_1 <- stan_glm(formula = pulse ~ 1, 
+                    data = x, 
+                    family = gaussian,
+                    seed = 9,
+                    refresh = 0)
+fit_1
+```
+```{r}
+newobs <- tibble(.rows = 2)
+
+pp <- posterior_predict(object = fit_1, 
+                  newdata = newobs) |> 
+as_tibble() |> 
+mutate(diff = abs(`1` - `2`))
+  
+```
+
+```{r}
+pp |>
+    ggplot(aes(x = diff)) +
+    geom_histogram(aes(y = after_stat(count/sum(count))),                     bins = 100) +
+  labs(title = "Difference of Pulse Rate Between 2 Women", 
+       subtitle = "The difference is usually less than 20",        
+       x = "Difference", 
+       y = "Count") +
+  scale_x_continuous(labels = scales::number_format()) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  theme_classic()
+```
+
+
+Preceptor Table -
+predictive or causal?
+treatments?
+covariates?
+validity? 
+outcome?
+units?
+
